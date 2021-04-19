@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2017 itemis AG (http://www.itemis.eu) and others.
+ * Copyright (c) 2015, 2021 itemis AG (http://www.itemis.eu) and others.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
  * http://www.eclipse.org/legal/epl-2.0.
@@ -53,7 +53,11 @@ public enum JavaVersion {
 	/**
 	 * Well, Java 11
 	 */
-	JAVA11("Java 11", new String[] {"11", "1.11"}, "JavaSE-11", "-1.11", Constants.JAVA11)
+	JAVA11("Java 11", new String[] {"11", "1.11"}, "JavaSE-11", "-1.11", Constants.JAVA11),
+	JAVA12("Java 12", new String[] {"12", "1.12"}, "JavaSE-12", "-1.12", Constants.JAVA12),
+	JAVA13("Java 13", new String[] {"13", "1.13"}, "JavaSE-13", "-1.13", Constants.JAVA13),
+	JAVA14("Java 14", new String[] {"14", "1.14"}, "JavaSE-14", "-1.14", Constants.JAVA14),
+	JAVA15("Java 15", new String[] {"15", "1.15"}, "JavaSE-15", "-1.15", Constants.JAVA15);
 	;
 
 	private static final class Constants {
@@ -66,6 +70,10 @@ public enum JavaVersion {
 		private static final long JAVA9 = ((long)(MAJOR_VERSION_1_5 + 4) << 16) + MINOR_VERSION_0;
 		private static final long JAVA10 = ((long)(MAJOR_VERSION_1_5 + 5) << 16) + MINOR_VERSION_0;
 		private static final long JAVA11 = ((long)(MAJOR_VERSION_1_5 + 6) << 16) + MINOR_VERSION_0;
+		private static final long JAVA12 = ((long)(MAJOR_VERSION_1_5 + 7) << 16) + MINOR_VERSION_0;
+		private static final long JAVA13 = ((long)(MAJOR_VERSION_1_5 + 8) << 16) + MINOR_VERSION_0;
+		private static final long JAVA14 = ((long)(MAJOR_VERSION_1_5 + 9) << 16) + MINOR_VERSION_0;
+		private static final long JAVA15 = ((long)(MAJOR_VERSION_1_5 + 10) << 16) + MINOR_VERSION_0;
 	}
 
 	//	 if you introduce a new JavaVersion don't forget to adapt

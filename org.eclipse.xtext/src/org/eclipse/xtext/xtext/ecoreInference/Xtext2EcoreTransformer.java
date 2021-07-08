@@ -63,6 +63,7 @@ import org.eclipse.xtext.util.XtextSwitch;
 import org.eclipse.xtext.xtext.GrammarResource;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
@@ -343,7 +344,7 @@ public class Xtext2EcoreTransformer {
 						if (nodes.size() > 1)
 							throw new IllegalStateException("Unexpected nodes found: " + nodes);
 						INode node = nodes.get(0);
-						String text = node.getText().trim().replace("^", "");
+						String text = NodeModelUtils.getTokenText(node).replace("^", "");
 						EEnumLiteral literal = null;
 						if (rule.getType().getMetamodel() instanceof ReferencedMetamodel) {
 							literal = returnType.getEEnumLiteral(text);

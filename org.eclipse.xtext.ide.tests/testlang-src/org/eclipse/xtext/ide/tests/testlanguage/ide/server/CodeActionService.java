@@ -10,6 +10,7 @@ package org.eclipse.xtext.ide.tests.testlanguage.ide.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -25,6 +26,7 @@ import org.eclipse.xtext.formatting2.regionaccess.ITextReplacement;
 import org.eclipse.xtext.ide.serializer.IChangeSerializer;
 import org.eclipse.xtext.ide.serializer.IEmfResourceChange;
 import org.eclipse.xtext.ide.serializer.ITextDocumentChange;
+import org.eclipse.xtext.ide.server.ILanguageServerAccess;
 import org.eclipse.xtext.ide.server.codeActions.ICodeActionService2;
 import org.eclipse.xtext.ide.server.codeActions.QuickFixCodeActionService;
 import org.eclipse.xtext.ide.tests.testlanguage.testLanguage.Member;
@@ -32,6 +34,7 @@ import org.eclipse.xtext.ide.tests.testlanguage.testLanguage.Model;
 import org.eclipse.xtext.ide.tests.testlanguage.testLanguage.TypeDeclaration;
 import org.eclipse.xtext.ide.tests.testlanguage.validation.TestLanguageValidator;
 import org.eclipse.xtext.util.CollectionBasedAcceptor;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.StringExtensions;
 
 import com.google.common.collect.Iterables;
@@ -50,10 +53,22 @@ public class CodeActionService extends QuickFixCodeActionService {
 		List<Either<Command, CodeAction>> actions = super.getCodeActions(options);
 		for (Diagnostic d : options.getCodeActionParams().getContext().getDiagnostics()) {
 			Object code = d.getCode().get();
-			if (TestLanguageValidator.INVALID_NAME.equals(code)) {
-				actions.add(Either.forLeft(fixInvalidName(d, options)));
-			} else if (TestLanguageValidator.UNSORTED_MEMBERS.equals(code)) {
-				actions.add(Either.forRight(fixUnsortedMembers(d, options)));
+			try {
+				actions.addAll(options.getLanguageServerAccess()
+						.doRead(options.getURI(), (ILanguageServerAccess.Context context) -> {
+							options.setDocument(context.getDocument());
+							options.setResource(context.getResource());
+
+							List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
+							if (TestLanguageValidator.INVALID_NAME.equals(code)) {
+								codeActions.add(Either.forLeft(fixInvalidName(d, options)));
+							} else if (TestLanguageValidator.UNSORTED_MEMBERS.equals(code)) {
+								codeActions.add(Either.forRight(fixUnsortedMembers(d, options)));
+							}
+							return codeActions;
+						}).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw Exceptions.sneakyThrow(e);
 			}
 		}
 		return actions;

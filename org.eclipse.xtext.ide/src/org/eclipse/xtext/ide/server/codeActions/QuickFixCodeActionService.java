@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -25,6 +25,8 @@ import org.eclipse.xtext.ide.editor.quickfix.AbstractDeclarativeIdeQuickfixProvi
 import org.eclipse.xtext.ide.editor.quickfix.DiagnosticResolution;
 import org.eclipse.xtext.ide.editor.quickfix.IQuickFixProvider;
 import org.eclipse.xtext.ide.editor.quickfix.QuickFix;
+import org.eclipse.xtext.ide.server.ILanguageServerAccess;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 
 import com.google.common.annotations.Beta;
 
@@ -56,11 +58,23 @@ public class QuickFixCodeActionService implements ICodeActionService2 {
 
 		List<Either<Command, CodeAction>> result = new ArrayList<>();
 		for (Diagnostic diagnostic : options.getCodeActionParams().getContext().getDiagnostics()) {
-			List<DiagnosticResolution> resolutions = quickfixes.getResolutions(options, diagnostic).stream()
-					.sorted(Comparator.nullsLast(Comparator.comparing(DiagnosticResolution::getLabel)))
-					.collect(Collectors.toList());
-			for (DiagnosticResolution resolution : resolutions) {
-				result.add(Either.forRight(createFix(resolution, diagnostic)));
+			if (quickfixes.handlesDiagnostic(diagnostic)) {
+				try {
+					result.addAll(options.getLanguageServerAccess()
+							.doRead(options.getURI(), (ILanguageServerAccess.Context context) -> {
+								options.setDocument(context.getDocument());
+								options.setResource(context.getResource());
+
+								List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
+								quickfixes.getResolutions(options, diagnostic).stream()
+										.sorted(Comparator
+												.nullsLast(Comparator.comparing(DiagnosticResolution::getLabel)))
+										.forEach(r -> codeActions.add(Either.forRight(createFix(r, diagnostic))));
+								return codeActions;
+							}).get());
+				} catch (InterruptedException | ExecutionException e) {
+					throw Exceptions.sneakyThrow(e);
+				}
 			}
 		}
 		return result;

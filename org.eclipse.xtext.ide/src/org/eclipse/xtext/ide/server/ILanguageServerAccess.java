@@ -13,7 +13,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
@@ -22,6 +21,7 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.xtext.ide.serializer.IChangeSerializer;
 import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
+import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
@@ -33,7 +33,7 @@ import org.eclipse.xtext.xbase.lib.util.ToStringBuilder;
  */
 public interface ILanguageServerAccess {
 	class Context {
-		private final Resource resource;
+		private final XtextResource resource;
 
 		private final Document document;
 
@@ -41,7 +41,7 @@ public interface ILanguageServerAccess {
 
 		private final CancelIndicator cancelChecker;
 
-		public Context(Resource resource, Document document, boolean isDocumentOpen, CancelIndicator cancelChecker) {
+		public Context(XtextResource resource, Document document, boolean isDocumentOpen, CancelIndicator cancelChecker) {
 			this.resource = resource;
 			this.document = document;
 			this.isDocumentOpen = isDocumentOpen;
@@ -58,7 +58,7 @@ public interface ILanguageServerAccess {
 			return b.toString();
 		}
 
-		public Resource getResource() {
+		public XtextResource getResource() {
 			return resource;
 		}
 

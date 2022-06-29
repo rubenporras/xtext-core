@@ -58,19 +58,13 @@ public class QuickFixCodeActionService implements ICodeActionService2 {
 
 		List<Either<Command, CodeAction>> result = new ArrayList<>();
 		for (Diagnostic diagnostic : options.getCodeActionParams().getContext().getDiagnostics()) {
-			if (quickfixes.handlesDiagnostic(diagnostic)) {
+			if (handlesDiagnostic(diagnostic)) {
 				try {
 					result.addAll(options.getLanguageServerAccess()
 							.doRead(options.getURI(), (ILanguageServerAccess.Context context) -> {
 								options.setDocument(context.getDocument());
 								options.setResource(context.getResource());
-
-								List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
-								quickfixes.getResolutions(options, diagnostic).stream()
-										.sorted(Comparator
-												.nullsLast(Comparator.comparing(DiagnosticResolution::getLabel)))
-										.forEach(r -> codeActions.add(Either.forRight(createFix(r, diagnostic))));
-								return codeActions;
+								return getCodeActions(options, diagnostic);
 							}).get());
 				} catch (InterruptedException | ExecutionException e) {
 					throw Exceptions.sneakyThrow(e);
@@ -80,6 +74,19 @@ public class QuickFixCodeActionService implements ICodeActionService2 {
 		return result;
 	}
 
+	protected boolean handlesDiagnostic(Diagnostic diagnostic) {
+		return quickfixes.handlesDiagnostic(diagnostic);
+	}
+
+	protected List<Either<Command, CodeAction>> getCodeActions(Options options, Diagnostic diagnostic) {
+		List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
+		quickfixes.getResolutions(options, diagnostic).stream()
+				.sorted(Comparator
+						.nullsLast(Comparator.comparing(DiagnosticResolution::getLabel)))
+				.forEach(r -> codeActions.add(Either.forRight(createFix(r, diagnostic))));
+		return codeActions;
+	}
+	
 	private CodeAction createFix(DiagnosticResolution resolution, Diagnostic diagnostic) {
 		CodeAction codeAction = new CodeAction();
 		codeAction.setDiagnostics(Collections.singletonList(diagnostic));

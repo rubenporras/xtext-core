@@ -10,13 +10,13 @@ package org.eclipse.xtext.ide.server.codeActions;
 
 import java.util.List;
 
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.xtext.ide.server.Document;
 import org.eclipse.xtext.ide.server.ILanguageServerAccess;
-import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 
 /**
@@ -31,7 +31,7 @@ public interface ICodeActionService2 {
 	class Options {
 		private Document document;
 
-		private XtextResource resource;
+		private Resource resource;
 		
 		private String uri;
 
@@ -49,11 +49,11 @@ public interface ICodeActionService2 {
 			this.document = document;
 		}
 
-		public XtextResource getResource() {
+		public Resource getResource() {
 			return resource;
 		}
 
-		public void setResource(XtextResource resource) {
+		public void setResource(Resource resource) {
 			this.resource = resource;
 		}
 

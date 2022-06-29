@@ -36,8 +36,8 @@ public interface IQuickFixProvider {
 	 *
 	 * @param options
 	 *            Contextual action options
-	 * @param fixMethods
-	 *            a list of methods that create the resolution
+	 * @param diagnostic
+	 *            the diagnostic
 	 * @return 0..n resolutions for the given issue
 	 */
 	List<DiagnosticResolution> getResolutions(Options options, Diagnostic diagnostic);
@@ -45,11 +45,11 @@ public interface IQuickFixProvider {
 	
 	/**
 	 *
-	 * Collects all of methods that create the resolution for the given diagnostic
+	 * If the provider handles (it has code to produce resolutions for) the given diagnostic.
 	 *
 	 * @param diagnostic
 	 *            the diagnostic
-	 * @return 0..n methods
+	 * @return true if the provider handles the given diagnostic
 	 * 
 	 * @since 2.28
 	 */

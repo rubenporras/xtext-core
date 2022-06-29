@@ -53,5 +53,7 @@ public interface IQuickFixProvider {
 	 * 
 	 * @since 2.28
 	 */
-	boolean handlesDiagnostic(Diagnostic diagnostic);
+	default boolean handlesDiagnostic(Diagnostic diagnostic) {
+		return true;
+	}
 }

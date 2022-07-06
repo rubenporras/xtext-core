@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -26,7 +25,6 @@ import org.eclipse.xtext.ide.editor.quickfix.DiagnosticResolution;
 import org.eclipse.xtext.ide.editor.quickfix.IQuickFixProvider;
 import org.eclipse.xtext.ide.editor.quickfix.QuickFix;
 import org.eclipse.xtext.ide.server.ILanguageServerAccess;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 
 import com.google.common.annotations.Beta;
 
@@ -59,16 +57,12 @@ public class QuickFixCodeActionService implements ICodeActionService2 {
 		List<Either<Command, CodeAction>> result = new ArrayList<>();
 		for (Diagnostic diagnostic : options.getCodeActionParams().getContext().getDiagnostics()) {
 			if (handlesDiagnostic(diagnostic)) {
-				try {
-					result.addAll(options.getLanguageServerAccess()
-							.doRead(options.getURI(), (ILanguageServerAccess.Context context) -> {
-								options.setDocument(context.getDocument());
-								options.setResource(context.getResource());
-								return getCodeActions(options, diagnostic);
-							}).get());
-				} catch (InterruptedException | ExecutionException e) {
-					throw Exceptions.sneakyThrow(e);
-				}
+				result.addAll(options.getLanguageServerAccess()
+						.doSyncRead(options.getURI(), (ILanguageServerAccess.Context context) -> {
+							options.setDocument(context.getDocument());
+							options.setResource(context.getResource());
+							return getCodeActions(options, diagnostic);
+						}));
 			}
 		}
 		return result;

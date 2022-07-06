@@ -1149,6 +1149,13 @@ public class LanguageServerImpl implements LanguageServer, WorkspaceService, Tex
 		public InitializeResult getInitializeResult() {
 			return initializeResult;
 		}
+
+		@Override
+		public <T extends Object> T doSyncRead(String uri, Function<ILanguageServerAccess.Context, T> function) {
+			return workspaceManager.doRead(uriExtensions.toUri(uri),
+					(document, resource) -> function.apply(new ILanguageServerAccess.Context(resource, document,
+							workspaceManager.isDocumentOpen(resource.getURI()), CancelIndicator.NullImpl)));
+		}
 	};
 
 	/**

@@ -68,9 +68,6 @@ public class DocumentSymbolService implements IDocumentSymbolService {
 	private UriExtensions uriExtensions;
 
 	@Inject
-	private DocumentExtensions documentExtensions;
-
-	@Inject
 	private EObjectAtOffsetHelper eObjectAtOffsetHelper;
 
 	@Inject
@@ -115,7 +112,7 @@ public class DocumentSymbolService implements IDocumentSymbolService {
 		for (URI targetURI : targetURIs) {
 			operationCanceledManager.checkCanceled(cancelIndicator);
 			doRead(resourceAccess, targetURI, (EObject obj) -> {
-				Location location = documentExtensions.newLocation(obj);
+				Location location = getDocumentExtensions(targetURI).newLocation(obj);
 				if (location != null) {
 					locations.add(location);
 				}
@@ -151,8 +148,9 @@ public class DocumentSymbolService implements IDocumentSymbolService {
 		TargetURIs targetURIs = collectTargetURIs(element);
 		referenceFinder.findAllReferences(targetURIs, resourceAccess, indexData,
 				new ReferenceAcceptor(resourceServiceProviderRegistry, (IReferenceDescription reference) -> {
-					doRead(resourceAccess, reference.getSourceEObjectUri(), (EObject obj) -> {
-						Location location = documentExtensions.newLocation(obj, reference.getEReference(),
+					URI sourceEObjectUri = reference.getSourceEObjectUri();
+					doRead(resourceAccess, sourceEObjectUri, (EObject obj) -> {
+						Location location = getDocumentExtensions(sourceEObjectUri).newLocation(obj, reference.getEReference(),
 								reference.getIndexInList());
 						if (location != null) {
 							locations.add(location);
@@ -250,7 +248,7 @@ public class DocumentSymbolService implements IDocumentSymbolService {
 	}
 
 	protected Location getSymbolLocation(EObject object) {
-		return documentExtensions.newLocation(object);
+		return getDocumentExtensions(object.eResource().getURI()).newLocation(object);
 	}
 
 	public List<? extends SymbolInformation> getSymbols(IResourceDescription resourceDescription, String query,
@@ -341,5 +339,10 @@ public class DocumentSymbolService implements IDocumentSymbolService {
 			}
 			return null;
 		});
+	}
+
+	private DocumentExtensions getDocumentExtensions(final URI targetURI) {
+		return resourceServiceProviderRegistry.getResourceServiceProvider(targetURI.trimFragment())
+				.get(DocumentExtensions.class);
 	}
 }

@@ -27,8 +27,6 @@ import org.eclipse.xtext.ide.server.rename.ChangeConverter2;
 import org.eclipse.xtext.resource.EObjectAtOffsetHelper;
 import org.eclipse.xtext.resource.XtextResource;
 
-import com.google.common.collect.MoreCollectors;
-
 /**
  * @author Heinrich Weichert
  *
@@ -121,7 +119,7 @@ public class DiagnosticResolution {
 			EObject obj = helper.resolveContainedElementAt(tmpResource, offset);
 
 			WorkspaceEdit edit = new WorkspaceEdit();
-			Diagnostic diagnostic = params.getContext().getDiagnostics().stream().collect(MoreCollectors.onlyElement());
+			Diagnostic diagnostic = params.getContext().getDiagnostics().stream().findFirst().get();
 			if (modification != null) {
 				DiagnosticModificationContext modificationContext = factory.createModificationContext();
 				ChangeConverter2 changeConverter = modificationContext.getConverterFactory().create(edit, access);
